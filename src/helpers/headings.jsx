@@ -1,0 +1,22 @@
+export const itemsHeadings = [
+    "Id",
+    "LP",
+    "Data Dodania",
+    "RCP",
+    "Odpowiedzialny",
+    "Nazwa",
+    "Lokalizacja",
+    "Producent",
+    "Model",
+    "SN",
+    "Typ",
+    "Opis",
+    "Status",
+    "Nr inwentarzowy",
+    "System Operacyjny",
+    "MPK",
+    "Utworzono",
+    "Zmodyfikowano",
+    "Akcje",
+  
+  ];

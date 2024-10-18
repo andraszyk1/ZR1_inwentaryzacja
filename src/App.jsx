@@ -29,9 +29,7 @@ function App() {
       throw Error("Bład");
     }
   };
-useEffect(()=>{
-  getItems(search, limit, currentPage)
-},[])
+
   const deleteItemFn = async (id) => {
     const params = `?id=${id}`;
     const response = await axios.delete(`${url}${params}`);
@@ -75,7 +73,7 @@ useEffect(()=>{
         (item) => item.id === changedItem.id
       );
       const newData = [...items.data].splice(indexChangedItem, 1, changedItem);
-      queryClient.setQueryData(["items",currentPage,limit,search],newData);
+      queryClient.setQueryData(["items",currentPage,limit,search],[...newData]);
      
       // queryClient.refetchQueries(["items",currentPage,limit,search]);
     },

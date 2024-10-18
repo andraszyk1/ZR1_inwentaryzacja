@@ -14,16 +14,21 @@ function App() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [countData, setCountData] = useState(null);
+  const [pages, setPages] = useState(null);
   const [id, setId] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showTable, setShowTable] = useState(true);
   const [itemToEdit, setItemToEdit] = useState({});
   
-  const getItems = async (search, limit, currentPage) => {
+  const getItems = async (currentPage,limit,search) => {
     const params = `?search=${search}&limit=${limit}&currentPage=${currentPage}`;
     try {
       const response = await axios.get(`${url}${params}`);
+      console.log(response.data);
+      setCountData(response.data?.countData)
+      setPages(response.data?.pages)
       return response.data
     } catch {
       throw Error("Bład");
@@ -72,9 +77,10 @@ function App() {
       const indexChangedItem = [...items.data].findIndex(
         (item) => item.id === changedItem.id
       );
-      const newData = [...items.data].splice(indexChangedItem, 1, changedItem);
-      queryClient.setQueryData(["items",currentPage,limit,search],[...newData]);
-     
+      const newData = [...items.data]
+      newData.splice(indexChangedItem, 1, changedItem);
+      console.log(newData);
+      queryClient.setQueryData(["items",currentPage,limit,search],{data:newData,countData,pages});
       // queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
@@ -87,15 +93,13 @@ function App() {
     onSuccess: (changedItem) => {
       const newData = [...items.data, changedItem];
       queryClient.setQueryData(["items",currentPage,limit,search], newData);
-      queryClient.refetchQueries(["items",currentPage,limit,search]);
+   
     },
   });
 
   const { data: items, isPending } = useQuery({
     queryKey: ["items",currentPage,limit,search],
-    queryFn: () => getItems(search, limit, currentPage),
-    
-    
+    queryFn: () => getItems(currentPage,limit,search)
   });
 
   const handleEdit = (id) => {

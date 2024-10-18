@@ -3,6 +3,7 @@ import express, { Request, Response } from "express";
 import { createItems } from "./helpers";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { ad } from "./adConfg";
 const prisma = new PrismaClient(); //{ log: ["query"] }
 const app = express();
 async function main() {
@@ -33,6 +34,7 @@ async function main() {
     });
     res.json(item);
   });
+
   app.get("/items", async (req: Request, res: Response) => {
     const { search, currentPage, limit } = req.query;
     const searchParam = { contains: String(search).trim().toLowerCase() };
@@ -67,6 +69,27 @@ async function main() {
       pages: Math.ceil(Number(countItems) / Number(limit)),
     });
   });
+  app.get("/items/users" , async (req: Request, res: Response) => {
+    ad.findUsers(function(err, users) {
+      if (err) {
+        console.log('ERROR: ' +JSON.stringify(err));
+        return;
+      }
+    
+     
+        console.log('findUsers: '+JSON.stringify(users));
+        res.json(JSON.stringify(users))
+        return JSON.stringify(users);
+     
+    })
+    
+    // const { search } = req.query;
+    // const searchParam = { contains: String(search).trim().toLowerCase() };
+    // const users=await prisma.item.findMany({select:{osobaOdpowiedzialna:true},where:{osobaOdpowiedzialna:searchParam},take:10})
+    // console.log(users);
+    
+  
+})
   app.all("*", (req: Request, res: Response) => {
     res.status(404).json({ error: `Route ${req.originalUrl} not found` });
   });

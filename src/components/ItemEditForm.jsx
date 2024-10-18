@@ -1,8 +1,10 @@
 import React from "react";
 import ItemInputForm from "./ItemInputForm";
 import CloseIcon from "./CloseIcon";
+import SelectUserForm from "./SelectUserForm";
 
 function ItemEditForm({
+  isPending,
   itemToEdit,
   handleSave,
   handleClose,
@@ -25,6 +27,11 @@ function ItemEditForm({
           label={"Id Pracownika "}
           onChange={handleOnChangeEditForm}
         />
+        <SelectUserForm 
+        value={itemToEdit?.osobaOdpowiedzialna}
+          name="osobaOdpowiedzialna"
+          label={"Osoba odpowiedzialna "}
+          onChange={handleOnChangeEditForm}/>
         <ItemInputForm
           value={itemToEdit?.osobaOdpowiedzialna}
           name="osobaOdpowiedzialna"
@@ -104,7 +111,7 @@ function ItemEditForm({
           onClick={handleSave}
           className="mb-4 bg-slate-300 text-sm uppercase bg-transparent p-2 text-gray-900 hover:transition-all hover:bg-gray-200 w-24 rounded-md transition-all"
         >
-          Zapisz
+          {isPending ? "Zapisuje..." : "Zapisz"}
         </button>
       </div>
     </form>

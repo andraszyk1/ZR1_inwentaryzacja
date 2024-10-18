@@ -4,9 +4,8 @@ import { trimString } from "../helpers/trimString";
 function Td({item,trim}) {
 const [itemValue,setItemValue]=useState(true)
 const [trimN]=useState(trim)
-const tdRef=useRef(null)
   return (
-    <td ref={tdRef.current} className="px-1 py-1 transition-all hover:cursor-pointer" onMouseOver={() => setItemValue(false)} onMouseLeave={(()=>setItemValue(true))}>
+    <td className="px-1 py-1 transition-all hover:cursor-pointer" onMouseOver={() => setItemValue(false)} onMouseLeave={(()=>setItemValue(true))}>
       {itemValue ? trimString(item, trimN):item}
     </td>
   );

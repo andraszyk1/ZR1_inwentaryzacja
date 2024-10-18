@@ -1,32 +1,30 @@
 import axios from "axios";
 import "./App.css";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Header from "./components/Header";
-
 import ItemEditForm from "./components/ItemEditForm";
 import SearchInput from "./components/SearchInput";
 import Table from "./components/Table";
 
+const url = "http://localhost:5001/items"; //jesli db.json to http://localhost:8000/items a jesli backend prisma to http://localhost:5001/items
+
 function App() {
-  const url = "http://localhost:5001/items";
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [edit, setEdit] = useState(false);
   const [id, setId] = useState(null);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showTable, setShowTable] = useState(true);
   const [itemToEdit, setItemToEdit] = useState({});
 
-  const getInwentaryzacja = async (search, limit, currentPage) => {
+  const getItems = async (search, limit, currentPage) => {
     const params = `?search=${search}&limit=${limit}&currentPage=${currentPage}`;
     try {
       const response = await axios.get(`${url}${params}`);
-      return response.data;
+      return response.data
     } catch {
       throw Error("Bład");
     }
@@ -39,51 +37,50 @@ function App() {
   };
   const editItemFn = async (itemToEdit) => {
     const response = await axios({
-      method: 'POST',
-      headers: {"Content-Type": "application/json"},
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       url: url,
-      data: {...itemToEdit},
+      data: { ...itemToEdit },
     });
     return response.data;
   };
   const addItemFn = async (itemToEdit) => {
     const response = await axios({
-      method: 'PUT',
-      headers: {"Content-Type": "application/json"},
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       url: url,
-      data: {...itemToEdit},
+      data: { ...itemToEdit },
     });
     return response.data;
   };
   const { mutate: deleteItemMutate, isPending: isPendingDelete } = useMutation({
-    mutationKey: ["items"],
+    mutationKey: ["items",id],
     mutationFn: (id) => deleteItemFn(id),
     onMutate: (id) => {
       alert(`Czy napewno usunac ${id}`);
     },
     onSuccess: (data) => {
       const newData = [...items.data].filter((item) => item.id !== data.id);
-      queryClient.setQueryData(
-        ["items",{id:data?.id}],
-        newData
-      );
-      setSearch("")
-      queryClient.refetchQueries()
+      queryClient.setQueryData(["items", { id: data?.id }], newData);
+      setSearch("");
+      queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
   const { mutate: editMutate, isPending: isPendingEdit } = useMutation({
-    mutationKey: ["items"],
+    queryKey: ["items",id,currentPage,limit,search],
     mutationFn: () => editItemFn(itemToEdit),
-    onMutate: (itemToEdit) => {
-      confirm(`Czy napewno edytować ${itemToEdit.id}`);
-    },
-    onSuccess: (changedItem,variables) => {
-      console.log(items.data);
-      const indexChangedItem=Array.from(items.data).findIndex(item=>item.id===changedItem.id);
-      const newData=[...items.data]
-      newData.splice(indexChangedItem,1,changedItem);
-      queryClient.setQueryData( ["items",{id:variables?.id}],newData);
-      queryClient.refetchQueries()
+    onSuccess: (changedItem) => {
+      const indexChangedItem = [...items.data].findIndex(
+        (item) => item.id === changedItem.id
+      );
+      const newData = [...items.data];
+      newData.splice(indexChangedItem, 1, changedItem);
+      console.log(newData);
+      
+      queryClient.setQueryData(["items",currentPage,limit,search],newData);
+      return queryClient.setQueryData(["items",currentPage,limit,search],newData);
+      
+      // queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
   const { mutate: addMutate, isPending: isPendingAdd } = useMutation({
@@ -93,22 +90,22 @@ function App() {
       confirm(`Czy napewno dodać ${itemToEdit?.nazwa}`);
     },
     onSuccess: (changedItem) => {
-      const newData=[...items.data,changedItem]
-      queryClient.setQueryData( ["items",{id:variables?.id}],newData);
-      queryClient.refetchQueries()
+      const newData = [...items.data, changedItem];
+      queryClient.setQueryData(["items", changedItem?.id,currentPage,limit,search], newData);
+      queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
 
- 
-
   const { data: items, isPending } = useQuery({
-    queryKey: ["items", search, currentPage, limit, id],
-    queryFn: () => getInwentaryzacja(search, limit, currentPage),
+    queryKey: ["items",currentPage,limit,search],
+    queryFn: () => getItems(search, limit, currentPage),
+    
+    
   });
 
   const handleEdit = (id) => {
     let itemEdit = [...items?.data].filter((item) => item.id === id)[0];
-    setId(id)
+    setId(id);
     setShowEditForm(!showEditForm);
     setShowTable(false);
     setItemToEdit(itemEdit);
@@ -120,8 +117,11 @@ function App() {
     setShowAddForm(true);
   };
   const handleOnChangeEditForm = (e) => {
-    console.log({[e.target.name]:e.target.value});
-  setItemToEdit(prevItem=>({...prevItem,[e.target.name]:e.target.value}))
+    console.log({ [e.target.name]: e.target.value });
+    setItemToEdit((prevItem) => ({
+      ...prevItem,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleDelete = (id) => {
@@ -140,72 +140,79 @@ function App() {
   const handleAddSave = (e) => {
     e.preventDefault();
     addMutate(itemToEdit);
-    setShowEditForm(false)
-    setShowAddForm(false)
-    setShowTable(true)
+    setShowEditForm(false);
+    setShowAddForm(false);
+    setShowTable(true);
   };
   const handleEditSave = (e) => {
     e.preventDefault();
     editMutate(itemToEdit);
-    setShowEditForm(false)
-    setShowAddForm(false)
-    setShowTable(true)
+    setShowEditForm(false);
+    setShowAddForm(false);
+    setShowTable(true);
   };
 
-  const renderFunction=()=>{
-    let render
-    if(showAddForm){
-      render=<ItemEditForm
-            title="Dodaj sprzęt"
-            itemToEdit={itemToEdit}
-            handleSave={handleAddSave}
-            handleClose={handleClose}
-            handleOnChangeEditForm={handleOnChangeEditForm}
-        />   
-      
-    }
-    if(showEditForm){
-      render=<ItemEditForm
-      title="Edytuj"
-      itemToEdit={itemToEdit}
-      handleSave={handleEditSave}
-      handleClose={handleClose}
-      handleOnChangeEditForm={handleOnChangeEditForm}
-    />
-
-    }
-    if(showTable){
-    render=<>
-    <div className="flex flex-col gap-2 justify-center   md:flex-row xl:flex-row">
-    <div className="flex float-start ">
-    <SearchInput handleSearchItem={handleSearchItem} />
-    </div>
-    <div className="flex float-right">
-    <button onClick={handleAddItem} className="bg-sky-400 p-2 hover:transition-colors md:w-64 xl:w-64 hover:bg-sky-300 w-full rounded-md">Dodaj sprzęt</button>
-    </div>
-    </div>
-    <Table
-      items={items}
-      isPending={isPending || isPendingAdd || isPendingDelete || isPendingEdit}
-      handleEdit={handleEdit}
-      handleDelete={handleDelete}
-      setCurrentPage={setCurrentPage}
-      currentPage={currentPage}
-      limit={limit}
-      setLimit={setLimit}
-    />
-    </>
-    }
-    return render
+  let render;
+  if (showAddForm) {
+    render = (
+      <ItemEditForm
+        title="Dodaj sprzęt"
+        itemToEdit={itemToEdit}
+        handleSave={handleAddSave}
+        handleClose={handleClose}
+        handleOnChangeEditForm={handleOnChangeEditForm}
+      />
+    );
   }
-  const render=renderFunction();
-  
+  if (showEditForm) {
+    render = (
+      <ItemEditForm
+        isPending={isPendingEdit}
+        title="Edytuj"
+        itemToEdit={itemToEdit}
+        handleSave={handleEditSave}
+        handleClose={handleClose}
+        handleOnChangeEditForm={handleOnChangeEditForm}
+      />
+    );
+  }
+  if (showTable) {
+    render = (
+      <>
+        <div className="flex flex-col gap-2 justify-center   md:flex-row xl:flex-row">
+          <div className="flex float-start ">
+            <SearchInput handleSearchItem={handleSearchItem} />
+          </div>
+          <div className="flex float-right">
+            <button
+              onClick={handleAddItem}
+              className="bg-sky-400 p-2 hover:transition-colors md:w-64 xl:w-64 hover:bg-sky-300 w-full rounded-md"
+            >
+              Dodaj sprzęt
+            </button>
+          </div>
+        </div>
+        <Table
+          items={items}
+          isPending={
+            isPending || isPendingAdd || isPendingDelete || isPendingEdit
+          }
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+          limit={limit}
+          setLimit={setLimit}
+        />
+      </>
+    );
+  }
+console.log(isPendingEdit);
+
   return (
     <>
       <Header />
-      <div className="container mx-auto px-4 items-center ">
-        {render}
-      </div>
+      <div className="container mx-auto px-4 items-center ">{render}</div>
     </>
   );
 }

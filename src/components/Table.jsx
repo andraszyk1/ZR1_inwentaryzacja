@@ -33,7 +33,7 @@ function Table({
                     <thead className="text-[10px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                       <tr className="hover:bg-gray-50 focus:bg-gray-300 active:bg-red-200 p-4">
                         {itemsHeadings?.map((itemKey, index) => (
-                          <th scope="col" className="px-1 py-0">
+                          <th key={index} scope="col" className="px-1 py-0">
                             {itemKey}
                           </th>
                         ))}
@@ -66,29 +66,24 @@ function Table({
                               key={id}
                               className="py-0 bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                             >
-                              <td className="px-1 py-1">{id}</td>
-                              <td className="px-1 py-1">{lp}</td>
-                              <td className="px-1 py-1">
-                                {ExcelDateToJSDate(data)}
-                              </td>
-                              <td className="px-1 py-1">{idPracownika}</td>
-                              <td className="px-1 py-1">
-                                {osobaOdpowiedzialna}
-                              </td>
-                              <Td item={nazwa}/>
-                              <Td item={lokalizacja} trim={6}/>
-                              <td className="px-1 py-1">{producent}</td>
-                              <td className="px-1 py-1">{model}</td>
-                              <td className="px-1 py-1">{sn}</td>
-                              <td className="px-1 py-1">{typ}</td>
-
-                              <Td item={opis} trim={10}/>
-                              <td className="px-1 py-1">{status}</td>
-                              <td className="px-1 py-1">{nrInwentarzowyIt}</td>
-                              <td className="px-1 py-1">{os}</td>
-                              <td className="px-1 py-1">{mpk}</td>
-                              <td className="px-1 py-1">{createdAt}</td>
-                              <td className="px-1 py-1">{updatedAt}</td>
+                              <Td item={id} />
+                              <Td item={lp} />
+                              <Td item={ExcelDateToJSDate(data)} />
+                              <Td item={idPracownika} />
+                              <Td item={osobaOdpowiedzialna} />
+                              <Td item={nazwa} />
+                              <Td item={lokalizacja} trim={6} />
+                              <Td item={producent} />
+                              <Td item={model} />
+                              <Td item={sn} />
+                              <Td item={typ} />
+                              <Td item={opis} trim={10} />
+                              <Td item={status} />
+                              <Td item={nrInwentarzowyIt} />
+                              <Td item={os} />
+                              <Td item={mpk} />
+                              <Td item={createdAt} />
+                              <Td item={updatedAt} />
                               <td className="px-1 py-1">
                                 <div className="flex flex-row justify-center text-center gap-2">
                                   <EditIcon onClick={() => handleEdit(id)} />
@@ -110,15 +105,12 @@ function Table({
                       </button>
                     </div>
                     <div>
-                      <ArrowLeftIcon
-                        disabled={currentPage <= 1}
-                        onClick={() => setCurrentPage((prev) => prev - 1)}
-                      />
+                 
                       <button
                         disabled={currentPage <= 1}
                         onClick={() => setCurrentPage((prev) => prev - 1)}
                       >
-                        Poprzednia
+                      Poprzednia
                       </button>
                     </div>
                     <div>

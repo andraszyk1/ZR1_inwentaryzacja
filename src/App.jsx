@@ -1,7 +1,7 @@
 import axios from "axios";
 import "./App.css";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import ItemEditForm from "./components/ItemEditForm";
 import SearchInput from "./components/SearchInput";
@@ -19,7 +19,7 @@ function App() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [showTable, setShowTable] = useState(true);
   const [itemToEdit, setItemToEdit] = useState({});
-
+  
   const getItems = async (search, limit, currentPage) => {
     const params = `?search=${search}&limit=${limit}&currentPage=${currentPage}`;
     try {
@@ -29,7 +29,9 @@ function App() {
       throw Error("Bład");
     }
   };
-
+useEffect(()=>{
+  getItems(search, limit, currentPage)
+},[])
   const deleteItemFn = async (id) => {
     const params = `?id=${id}`;
     const response = await axios.delete(`${url}${params}`);
@@ -61,37 +63,32 @@ function App() {
     },
     onSuccess: (data) => {
       const newData = [...items.data].filter((item) => item.id !== data.id);
-      queryClient.setQueryData(["items", { id: data?.id }], newData);
-      setSearch("");
+      queryClient.setQueryData(["items",currentPage,limit,search], newData);
       queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
   const { mutate: editMutate, isPending: isPendingEdit } = useMutation({
-    queryKey: ["items",id,currentPage,limit,search],
+    queryKey: ["items",id],
     mutationFn: () => editItemFn(itemToEdit),
     onSuccess: (changedItem) => {
       const indexChangedItem = [...items.data].findIndex(
         (item) => item.id === changedItem.id
       );
-      const newData = [...items.data];
-      newData.splice(indexChangedItem, 1, changedItem);
-      console.log(newData);
-      
+      const newData = [...items.data].splice(indexChangedItem, 1, changedItem);
       queryClient.setQueryData(["items",currentPage,limit,search],newData);
-      return queryClient.setQueryData(["items",currentPage,limit,search],newData);
-      
+     
       // queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
   const { mutate: addMutate, isPending: isPendingAdd } = useMutation({
-    mutationKey: ["items"],
+    mutationKey: ["add"],
     mutationFn: (itemToEdit) => addItemFn(itemToEdit),
     onMutate: (itemToEdit) => {
       confirm(`Czy napewno dodać ${itemToEdit?.nazwa}`);
     },
     onSuccess: (changedItem) => {
       const newData = [...items.data, changedItem];
-      queryClient.setQueryData(["items", changedItem?.id,currentPage,limit,search], newData);
+      queryClient.setQueryData(["items",currentPage,limit,search], newData);
       queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });

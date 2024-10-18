@@ -27,12 +27,7 @@ function ItemEditForm({
           label={"Id Pracownika "}
           onChange={handleOnChangeEditForm}
         />
-        <SelectUserForm 
-        value={itemToEdit?.osobaOdpowiedzialna}
-          name="osobaOdpowiedzialna"
-          label={"Osoba odpowiedzialna "}
-          onChange={handleOnChangeEditForm}/>
-        <ItemInputForm
+        <SelectUserForm
           value={itemToEdit?.osobaOdpowiedzialna}
           name="osobaOdpowiedzialna"
           label={"Osoba odpowiedzialna "}

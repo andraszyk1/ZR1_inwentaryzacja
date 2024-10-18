@@ -70,24 +70,25 @@ async function main() {
     });
   });
   app.get("/items/users" , async (req: Request, res: Response) => {
-    ad.findUsers(function(err, users) {
-      if (err) {
-        console.log('ERROR: ' +JSON.stringify(err));
-        return;
-      }
+    // ad.findUsers(function(err, users) {
+    //   if (err) {
+    //     console.log('ERROR: ' +JSON.stringify(err));
+    //     return;
+    //   }
     
      
-        console.log('findUsers: '+JSON.stringify(users));
-        res.json(JSON.stringify(users))
-        return JSON.stringify(users);
+    //     console.log('findUsers: '+JSON.stringify(users));
+    //     res.json(JSON.stringify(users))
+    //     return JSON.stringify(users);
      
-    })
+    // })
     
-    // const { search } = req.query;
-    // const searchParam = { contains: String(search).trim().toLowerCase() };
-    // const users=await prisma.item.findMany({select:{osobaOdpowiedzialna:true},where:{osobaOdpowiedzialna:searchParam},take:10})
-    // console.log(users);
+    const { search } = req.query;
+    const users=await prisma.item.findMany({
+      select:{osobaOdpowiedzialna:true},
+      where:{osobaOdpowiedzialna:{contains:String(search)}},take:10})
     
+    res.json(users)
   
 })
   app.all("*", (req: Request, res: Response) => {

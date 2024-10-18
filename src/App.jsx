@@ -66,8 +66,7 @@ function App() {
     },
     onSuccess: (data) => {
       const newData = [...items.data].filter((item) => item.id !== data.id);
-      queryClient.setQueryData(["items",currentPage,limit,search], newData);
-      queryClient.refetchQueries(["items",currentPage,limit,search]);
+      queryClient.setQueryData(["items",currentPage,limit,search], {data:newData,countData,pages});
     },
   });
   const { mutate: editMutate, isPending: isPendingEdit } = useMutation({
@@ -81,7 +80,6 @@ function App() {
       newData.splice(indexChangedItem, 1, changedItem);
       console.log(newData);
       queryClient.setQueryData(["items",currentPage,limit,search],{data:newData,countData,pages});
-      // queryClient.refetchQueries(["items",currentPage,limit,search]);
     },
   });
   const { mutate: addMutate, isPending: isPendingAdd } = useMutation({
@@ -92,7 +90,7 @@ function App() {
     },
     onSuccess: (changedItem) => {
       const newData = [...items.data, changedItem];
-      queryClient.setQueryData(["items",currentPage,limit,search], newData);
+      queryClient.setQueryData(["items",currentPage,limit,search], {data:newData,countData,pages});
    
     },
   });

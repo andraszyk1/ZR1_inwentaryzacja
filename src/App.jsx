@@ -8,7 +8,7 @@ import SearchInput from "./components/SearchInput";
 import Table from "./components/Table";
 import GetUsersFromAD from "./components/GetUsersFromAD";
 
-const url = "http://localhost:5001/items"; //jesli db.json to http://localhost:8000/items a jesli backend prisma to http://localhost:5001/items
+const url = "https://apizrinwentaryzacja.netlify.app/api/items"; //jesli db.json to http://localhost:8000/items a jesli backend prisma to http://localhost:5001/items
 
 function App() {
   const queryClient = useQueryClient();

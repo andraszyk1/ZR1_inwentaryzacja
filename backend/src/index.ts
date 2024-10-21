@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import express, { Request, Response } from "express";
+import express, { Request, Response,Router } from "express";
 import { createItems } from "./helpers";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -11,24 +11,25 @@ const app = express();
 async function main() {
   app.use(cors());
   app.use(bodyParser.json());
-  app.get("/", async (req: Request, res: Response) => {
+  const router = Router();
+  router.get("/", async (req: Request, res: Response) => {
     res.json({ message: "Server is working..." });
   });
 
-  app.delete("/items", async (req: Request, res: Response) => {
+  router.delete("/items", async (req: Request, res: Response) => {
     console.log(req.query.id);
     const item = await prisma.item.delete({
       where: { id: Number(req.query.id) },
     });
     res.json(item);
   });
-  app.put("/items", async (req: Request, res: Response) => {
+  router.put("/items", async (req: Request, res: Response) => {
     const item = await prisma.item.create({
       data: { ...req.body, data: new Date().toDateString() },
     });
     res.json(item);
   });
-  app.post("/items", async (req: Request, res: Response) => {
+  router.post("/items", async (req: Request, res: Response) => {
     console.log(req.body);
     const item = await prisma.item.update({
       where: { id: Number(req.body.id) },
@@ -37,7 +38,7 @@ async function main() {
     res.json(item);
   });
 
-  app.get("/items", async (req: Request, res: Response) => {
+  router.get("/items", async (req: Request, res: Response) => {
     const { search, currentPage, limit } = req.query;
     const searchParam = { contains: String(search).trim().toLowerCase() };
     const whereOrTable = [
@@ -74,7 +75,7 @@ async function main() {
       pages: Math.ceil(Number(countItems) / Number(limit)),
     });
   });
-  app.get("/getusersfromad", async (req: Request, res: Response) => {
+  router.get("/getusersfromad", async (req: Request, res: Response) => {
     console.log("/getusersfromad");
     
     ad.findUsers(async (err, users) => {
@@ -103,16 +104,17 @@ async function main() {
       
     });
   });
-  app.get("/items/users", async (req: Request, res: Response) => {
+  router.get("/items/users", async (req: Request, res: Response) => {
     const { search } = req.query;
     const users = await prisma.user.findMany({where:{cn:{contains:String(search)}},take:10});
     console.log(users,search);
     
     res.json(users);
   });
-  app.all("*", (req: Request, res: Response) => {
+  router.all("*", (req: Request, res: Response) => {
     res.status(404).json({ error: `Route ${req.originalUrl} not found` });
   });
+  app.use("/api/",router)
 }
 
 main()

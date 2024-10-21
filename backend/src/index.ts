@@ -4,11 +4,13 @@ import { createItems } from "./helpers";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { ad } from "./adConfg";
+import { log } from "console";
+import serverless from "serverless-http";
 const prisma = new PrismaClient(); //{ log: ["query"] }
 const app = express();
 async function main() {
   app.use(cors());
-  app.use(bodyParser.json())
+  app.use(bodyParser.json());
   app.get("/", async (req: Request, res: Response) => {
     res.json({ message: "Server is working..." });
   });
@@ -22,7 +24,7 @@ async function main() {
   });
   app.put("/items", async (req: Request, res: Response) => {
     const item = await prisma.item.create({
-      data:{...req.body,data:new Date().toDateString()}
+      data: { ...req.body, data: new Date().toDateString() },
     });
     res.json(item);
   });
@@ -30,7 +32,7 @@ async function main() {
     console.log(req.body);
     const item = await prisma.item.update({
       where: { id: Number(req.body.id) },
-      data:req.body
+      data: req.body,
     });
     res.json(item);
   });
@@ -46,7 +48,7 @@ async function main() {
       { producent: searchParam },
       { sn: searchParam },
     ];
-    const [countItems,items]=await prisma.$transaction([
+    const [countItems, items] = await prisma.$transaction([
       prisma.item.count({
         where: {
           OR: whereOrTable,
@@ -59,38 +61,55 @@ async function main() {
         orderBy: {
           id: "asc",
         },
-        take:Number(limit),
-        skip:Number(currentPage)===1 ? 0 : (Number(currentPage)-1) * Number(limit)
-      })
-    ])
+        take: Number(limit),
+        skip:
+          Number(currentPage) === 1
+            ? 0
+            : (Number(currentPage) - 1) * Number(limit),
+      }),
+    ]);
     res.json({
       data: items,
       countData: countItems,
       pages: Math.ceil(Number(countItems) / Number(limit)),
     });
   });
-  app.get("/items/users" , async (req: Request, res: Response) => {
-    // ad.findUsers(function(err, users) {
-    //   if (err) {
-    //     console.log('ERROR: ' +JSON.stringify(err));
-    //     return;
-    //   }
+  app.get("/getusersfromad", async (req: Request, res: Response) => {
+    console.log("/getusersfromad");
     
-     
-    //     console.log('findUsers: '+JSON.stringify(users));
-    //     res.json(JSON.stringify(users))
-    //     return JSON.stringify(users);
-     
-    // })
-    
-    const { search } = req.query;
-    const users=await prisma.item.findMany({
-      select:{osobaOdpowiedzialna:true},
-      where:{osobaOdpowiedzialna:{contains:String(search)}},take:10})
-    
-    res.json(users)
+    ad.findUsers(async (err, users) => {
+      if (err) {
+        console.log("ERROR: " + JSON.stringify(err));
+        return;
+      }
+      const checkIsPresentUser=await prisma.user.findFirst({where:{id:1}})
+      if(checkIsPresentUser?.id===1){
+        await prisma.user.deleteMany()
+        await prisma.user.createMany({
+          data: JSON.parse(JSON.stringify(users)),
+        });
+        res.json({message:`Usunięto i Pobrano na nowo użytkowników domenowych`})
+      } else {
+        await prisma.user.createMany({
+          data: JSON.parse(JSON.stringify(users)),
+        });
+        const usersa= await prisma.user.findMany();
+        console.log(usersa);
+        
+        res.json({message:`Użytkownicków nie było więc zostali pobrani`})
+      }
   
-})
+    
+      
+    });
+  });
+  app.get("/items/users", async (req: Request, res: Response) => {
+    const { search } = req.query;
+    const users = await prisma.user.findMany({where:{cn:{contains:String(search)}},take:10});
+    console.log(users,search);
+    
+    res.json(users);
+  });
   app.all("*", (req: Request, res: Response) => {
     res.status(404).json({ error: `Route ${req.originalUrl} not found` });
   });
@@ -105,4 +124,5 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-const server = app.listen(5001);
+// const server = app.listen(5001);
+export const handler = serverless(app);

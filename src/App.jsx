@@ -6,6 +6,7 @@ import Header from "./components/Header";
 import ItemEditForm from "./components/ItemEditForm";
 import SearchInput from "./components/SearchInput";
 import Table from "./components/Table";
+import GetUsersFromAD from "./components/GetUsersFromAD";
 
 const url = "http://localhost:5001/items"; //jesli db.json to http://localhost:8000/items a jesli backend prisma to http://localhost:5001/items
 
@@ -180,6 +181,7 @@ function App() {
           <div className="flex float-start ">
             <SearchInput handleSearchItem={handleSearchItem} />
           </div>
+     
           <div className="flex float-right">
             <button
               onClick={handleAddItem}
@@ -209,7 +211,8 @@ console.log(isPendingEdit);
   return (
     <>
       <Header />
-      <div className="container mx-auto px-4 items-center ">{render}</div>
+      <div className="container mx-auto px-4 items-center ">{render}     <GetUsersFromAD/></div>
+ 
     </>
   );
 }

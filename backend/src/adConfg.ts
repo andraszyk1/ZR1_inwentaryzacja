@@ -45,7 +45,7 @@ interface ADProperties {
 }
 const config:ADProperties = { 
     url: 'ldap://192.168.64.3',
-   baseDN: 'OU=Poland,DC=maflow,DC=group',
+   baseDN: 'OU=Dzial EDP,OU=o365,OU=Torun,OU=Users_PL,OU=Poland,DC=maflow,DC=group',
    username: 'admlandraszyk@maflow.group',
    password: 'Trombone1234!',
    attributes :{

@@ -69,7 +69,7 @@ function SelectUserForm({ value, name, label, onChange, hidden = false }) {
             placeholder={label}
             type="input"
             onChange={(e) => handleOnChange(e)}
-            className=" bottom-2 appearance-none text-sm block w-full border border-grey-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+            className=" relative mb-0 bottom-2 appearance-none text-sm block w-full border border-grey-500 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
             hidden={hidden}
           >
             <option defaultValue="" value="" key='selected'>Wybierz</option>
@@ -77,8 +77,8 @@ function SelectUserForm({ value, name, label, onChange, hidden = false }) {
             {value!==undefined ?
               users?.map((user,index) => {
                 return (
-                  <option key={index} value={user.osobaOdpowiedzialna}>
-                    {user.osobaOdpowiedzialna}
+                  <option key={index} value={user.cn}>
+                    {user.cn}
                   </option>
                 );
               }):<option  value={value}>{value}</option>}
